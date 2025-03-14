@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  maai:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: maai-app
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./conversations_log:/app/conversations_log
+      - ./.env:/app/.env
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Shanghai
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s 

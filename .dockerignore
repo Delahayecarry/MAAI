@@ -1,0 +1,87 @@
+# Git
+.git
+.gitignore
+.github
+
+# 环境变量和敏感信息
+.env
+*.env
+.env.*
+
+# 日志文件
+*.log
+logs/
+conversations_log/
+simulation.log
+
+# 缓存文件
+.cache/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# 虚拟环境
+venv/
+ENV/
+env/
+.venv/
+.conda/
+
+# Node.js 相关
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# 前端构建输出 (会在容器内构建)
+frontend/dist/
+frontend/build/
+frontend/.vite/
+
+# IDE 和编辑器相关
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Docker 相关
+.docker/
+docker-compose.override.yml
+Dockerfile
+.dockerignore
+
+# 文档和其他不需要的文件
+README.md
+MIGRATION.md
+LICENSE
+*.md
+docs/
+
+# 测试文件
+test/
+tests/
+*_test.py
+*_tests.py
+
+# 临时文件
+tmp/
+temp/
+.tmp/
+.temp/
+
+# 系统文件
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# 其他工具脚本
+fix_sse_all.py 
