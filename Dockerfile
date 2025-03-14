@@ -43,7 +43,7 @@ COPY --from=backend-builder /usr/local/lib/python3.10/site-packages /usr/local/l
 COPY --from=backend-builder /usr/local/bin /usr/local/bin
 
 # 复制前端构建产物
-COPY --from=frontend-builder /app/frontend/dist /app/frontend/dist
+COPY --from=frontend-builder /app/frontend /app/frontend
 
 # 复制应用代码
 COPY backend/ /app/backend/
@@ -57,10 +57,10 @@ RUN mkdir -p /app/conversations_log
 
 # 设置环境变量
 ENV PYTHONPATH=/app
-ENV FRONTEND_DIST_PATH=/app/frontend/dist
+ENV FRONTEND_DIST_PATH=/app/frontend
 
 # 暴露端口
-EXPOSE 8000
+EXPOSE 8000 3000
 
 # 创建启动脚本
 RUN echo '#!/bin/bash\n\
@@ -68,6 +68,10 @@ if [ ! -f /app/.env ]; then\n\
   echo "警告: 未找到 .env 文件，使用默认配置"\n\
   touch /app/.env\n\
 fi\n\
+# 启动前端服务\n\
+cd /app/frontend\n\
+npm run dev &\n\
+# 启动后端服务\n\
 cd /app\n\
 python backend/main.py\n\
 ' > /app/docker-entrypoint.sh && chmod +x /app/docker-entrypoint.sh
