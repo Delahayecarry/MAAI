@@ -32,10 +32,14 @@ RUN pip install --no-cache-dir -r requirements.txt
 FROM python:3.10-slim
 WORKDIR /app
 
-# 安装系统依赖
+# 安装系统依赖和 Node.js
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     python3-dev \
+    curl \
+    gnupg \
+    && curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
     && rm -rf /var/lib/apt/lists/*
 
 # 复制后端依赖
@@ -70,7 +74,7 @@ if [ ! -f /app/.env ]; then\n\
 fi\n\
 # 启动前端服务\n\
 cd /app/frontend\n\
-npm run dev &\n\
+npm run dev -- --port 3000 &\n\
 # 启动后端服务\n\
 cd /app\n\
 python backend/main.py\n\
