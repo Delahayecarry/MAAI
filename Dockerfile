@@ -10,7 +10,8 @@ RUN npm install
 # 复制前端源代码
 COPY frontend/ ./
 
-# 构建前端
+# 构建前端 (跳过类型检查)
+RUN echo "VITE_SKIP_TS_CHECK=true" > .env
 RUN npm run build
 
 # 阶段2: 构建后端

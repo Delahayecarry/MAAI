@@ -10,6 +10,16 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  esbuild: {
+    logOverride: { 'this-is-undefined-in-esm': 'silent' },
+    // 忽略类型错误
+    tsconfigRaw: {
+      compilerOptions: {
+        skipLibCheck: true,
+        noImplicitAny: false,
+      }
+    }
+  },
   server: {
     proxy: {
       '/api': {

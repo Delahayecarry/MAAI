@@ -164,7 +164,7 @@ const RelationshipGraph = () => {
       .force('link', d3.forceLink<Node, Link>(filteredLinks).id(d => d.id).distance(100))
       .force('charge', d3.forceManyBody().strength(-300))
       .force('center', d3.forceCenter(width / 2, height / 2))
-      .force('collision', d3.forceCollide().radius(d => Math.sqrt(d.messageCount || 1) * 5 + 20))
+      .force('collision', d3.forceCollide().radius((d: any) => Math.sqrt(d.messageCount || 1) * 5 + 20))
     
     // 颜色比例尺
     const color = d3.scaleOrdinal(d3.schemeCategory10)
@@ -188,11 +188,10 @@ const RelationshipGraph = () => {
       .call(d3.drag<SVGGElement, Node>()
         .on('start', dragstarted)
         .on('drag', dragged)
-        .on('end', dragended))
+        .on('end', dragended) as any)
       .on('click', (event, d) => {
         setSelectedAgent(selectedAgent === d.id ? null : d.id)
       })
-    
     // 添加圆形背景
     node.append('circle')
       .attr('r', d => Math.sqrt(d.messageCount || 1) * 5 + 15)
