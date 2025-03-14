@@ -21,6 +21,7 @@ WORKDIR /app
 # 安装系统依赖
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
+    python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # 复制后端依赖文件
@@ -30,6 +31,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 阶段3: 最终镜像
 FROM python:3.10-slim
 WORKDIR /app
+
+# 安装系统依赖
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # 复制后端依赖
 COPY --from=backend-builder /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
