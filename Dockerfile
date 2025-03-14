@@ -74,7 +74,7 @@ if [ ! -f /app/.env ]; then\n\
 fi\n\
 # 启动前端服务\n\
 cd /app/frontend\n\
-npm run dev -- --port 3000 &\n\
+npm run dev -- --host 0.0.0.0 --port 3000 &\n\
 # 启动后端服务\n\
 cd /app\n\
 python backend/main.py\n\
