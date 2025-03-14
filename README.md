@@ -19,7 +19,7 @@
 ### 后端
 - FastAPI
 - AutoGen 0.4
-- Python 3.9+
+- Python 3.10+
 
 ## 功能特点
 
@@ -59,7 +59,7 @@
 ## 安装与运行
 
 ### 环境要求
-- Python 3.9+
+- Python 3.10+
 - Node.js 16+
 - npm 8+
 

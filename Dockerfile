@@ -14,7 +14,7 @@ COPY frontend/ ./
 RUN npm run build
 
 # 阶段2: 构建后端
-FROM python:3.9-slim AS backend-builder
+FROM python:3.10-slim AS backend-builder
 WORKDIR /app
 
 # 安装系统依赖
@@ -27,11 +27,11 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 阶段3: 最终镜像
-FROM python:3.9-slim
+FROM python:3.10-slim
 WORKDIR /app
 
 # 复制后端依赖
-COPY --from=backend-builder /usr/local/lib/python3.9/site-packages /usr/local/lib/python3.9/site-packages
+COPY --from=backend-builder /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
 COPY --from=backend-builder /usr/local/bin /usr/local/bin
 
 # 复制前端构建产物
