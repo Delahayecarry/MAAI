@@ -74,6 +74,7 @@ if [ ! -f /app/.env ]; then\n\
 fi\n\
 # 启动前端服务\n\
 cd /app/frontend\n\
+echo "export default { server: { host: true, port: 3000 } }" > vite.config.js\n\
 npm run dev -- --host 0.0.0.0 --port 3000 &\n\
 # 启动后端服务\n\
 cd /app\n\
