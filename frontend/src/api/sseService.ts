@@ -4,6 +4,11 @@ export class SSEService {
   private reconnectAttempts = 0
   private eventSource: EventSource | null = null
   
+  // 检查连接状态
+  isConnected(): boolean {
+    return this.eventSource !== null && this.eventSource.readyState === EventSource.OPEN
+  }
+  
   // 连接到SSE事件流
   connect(): void {
     if (this.eventSource) {
@@ -11,38 +16,48 @@ export class SSEService {
     }
     
     console.log('正在连接SSE事件流...')
-    this.eventSource = new EventSource('/api/events')
-    
-    // 处理连接打开
-    this.eventSource.onopen = () => {
-      console.log('SSE连接已建立')
-      this.resetReconnectAttempts()
-    }
-    
-    // 处理消息事件
-    this.eventSource.addEventListener('message', this.handleMessage)
-    
-    // 处理智能体消息事件
-    this.eventSource.addEventListener('agent_message', this.handleAgentMessage)
-    
-    // 处理模拟状态变更事件
-    this.eventSource.addEventListener('simulation_status', this.handleSimulationStatus)
-    
-    // 处理错误
-    this.eventSource.onerror = (error) => {
-      console.error('SSE连接错误:', error)
+    try {
+      // 尝试连接到 /api/events 端点
+      const baseUrl = window.location.protocol + '//' + window.location.host;
+      const url = baseUrl + '/api/events';
+      console.log('SSE连接URL:', url);
       
-      // 检查错误类型
-      if (this.eventSource && this.eventSource.readyState === EventSource.CLOSED) {
-        console.log('SSE连接已关闭，尝试重新连接')
-        this.reconnect()
-      } else if (this.eventSource && this.eventSource.readyState === EventSource.CONNECTING) {
-        console.log('SSE正在尝试连接，等待连接结果')
-        // 等待连接结果，不立即重连
-      } else {
-        console.log('SSE连接出现未知错误，尝试重新连接')
-        this.reconnect()
+      this.eventSource = new EventSource(url);
+      
+      // 处理连接打开
+      this.eventSource.onopen = () => {
+        console.log('SSE连接已建立')
+        this.resetReconnectAttempts()
       }
+      
+      // 处理消息事件
+      this.eventSource.addEventListener('message', this.handleMessage)
+      
+      // 处理智能体消息事件
+      this.eventSource.addEventListener('agent_message', this.handleAgentMessage)
+      
+      // 处理模拟状态变更事件
+      this.eventSource.addEventListener('simulation_status', this.handleSimulationStatus)
+      
+      // 处理错误
+      this.eventSource.onerror = (error) => {
+        console.error('SSE连接错误:', error)
+        
+        // 检查错误类型
+        if (this.eventSource && this.eventSource.readyState === EventSource.CLOSED) {
+          console.log('SSE连接已关闭，尝试重新连接')
+          this.reconnect()
+        } else if (this.eventSource && this.eventSource.readyState === EventSource.CONNECTING) {
+          console.log('SSE正在尝试连接，等待连接结果')
+          // 等待连接结果，不立即重连
+        } else {
+          console.log('SSE连接出现未知错误，尝试重新连接')
+          this.reconnect()
+        }
+      }
+    } catch (error) {
+      console.error('创建SSE连接时出错:', error)
+      this.reconnect()
     }
   }
   
@@ -72,10 +87,18 @@ export class SSEService {
     
     console.log(`尝试第 ${this.reconnectAttempts} 次重新连接SSE，等待 ${backoffTime/1000} 秒...`)
     
-    setTimeout(() => {
-      console.log('正在重新连接SSE...')
-      this.connect()
-    }, backoffTime)
+    // 如果重连次数超过3次，尝试备用端点
+    if (this.reconnectAttempts > 3) {
+      setTimeout(() => {
+        console.log('多次重连失败，尝试备用端点')
+        this.tryAlternativeEndpoint()
+      }, backoffTime)
+    } else {
+      setTimeout(() => {
+        console.log('正在重新连接SSE...')
+        this.connect()
+      }, backoffTime)
+    }
   }
   
   // 重置重连尝试次数
@@ -99,6 +122,7 @@ export class SSEService {
     try {
       console.log('收到智能体消息事件:', event.data)
       console.log('事件类型:', event.type)
+      console.log('事件对象:', event)
       
       // 检查数据是否为空
       if (!event.data) {
@@ -181,6 +205,40 @@ export class SSEService {
       }
     } catch (error) {
       console.error('处理模拟状态变更失败:', error, '原始数据:', event.data)
+    }
+  }
+  
+  // 尝试连接到备用端点
+  tryAlternativeEndpoint(): void {
+    try {
+      console.log('尝试连接到备用SSE端点...')
+      const baseUrl = window.location.protocol + '//' + window.location.host;
+      const url = baseUrl + '/events';
+      console.log('备用SSE连接URL:', url);
+      
+      if (this.eventSource) {
+        this.disconnect();
+      }
+      
+      this.eventSource = new EventSource(url);
+      
+      // 设置事件处理程序...
+      this.eventSource.onopen = () => {
+        console.log('备用SSE连接已建立')
+        this.resetReconnectAttempts()
+      }
+      
+      this.eventSource.addEventListener('message', this.handleMessage)
+      this.eventSource.addEventListener('agent_message', this.handleAgentMessage)
+      this.eventSource.addEventListener('simulation_status', this.handleSimulationStatus)
+      
+      this.eventSource.onerror = (error) => {
+        console.error('备用SSE连接错误:', error)
+        this.reconnect()
+      }
+    } catch (error) {
+      console.error('创建备用SSE连接时出错:', error)
+      this.reconnect()
     }
   }
 }

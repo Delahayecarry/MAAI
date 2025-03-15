@@ -24,7 +24,7 @@ const LiveChatPage = () => {
     const fetchScenarios = async () => {
       try {
         const scenarios = await apiService.getScenarios()
-        useChatStore.getState().setScenarios(scenarios)
+        useChatStore.getState().setScenarios(Array.isArray(scenarios) ? scenarios : [])
       } catch (err) {
         console.error('获取场景列表失败:', err)
         setError('获取场景列表失败，请检查后端服务是否正常运行')
@@ -45,9 +45,14 @@ const LiveChatPage = () => {
   useEffect(() => {
     if (!isConnected && isSimulationRunning) {
       setError('SSE连接已断开，请刷新页面重新连接')
+      console.error('SSE连接已断开，但模拟仍在运行')
     } else if (isConnected && error === 'SSE连接已断开，请刷新页面重新连接') {
       setError(null)
+      console.log('SSE连接已恢复')
     }
+    
+    // 记录连接状态变化
+    console.log('SSE连接状态变化:', isConnected ? '已连接' : '未连接')
   }, [isConnected, isSimulationRunning, error])
   
   // 启动模拟
@@ -69,6 +74,21 @@ const LiveChatPage = () => {
         setSimulationRunning(true)
         // 清空之前的消息
         useChatStore.getState().clearMessages()
+        
+        // 添加调试代码：每秒检查一次消息状态
+        const checkMessages = setInterval(() => {
+          const currentMessages = useChatStore.getState().messages;
+          console.log('当前消息数量:', currentMessages.length);
+          if (currentMessages.length > 0) {
+            console.log('最新消息:', currentMessages[currentMessages.length - 1]);
+            clearInterval(checkMessages);
+          }
+        }, 1000);
+        
+        // 30秒后清除定时器
+        setTimeout(() => {
+          clearInterval(checkMessages);
+        }, 30000);
       } else {
         console.error('模拟启动失败:', response.message)
         setError(`模拟启动失败: ${response.message}`)

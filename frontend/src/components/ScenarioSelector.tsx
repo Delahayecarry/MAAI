@@ -19,7 +19,7 @@ const ScenarioSelector = ({ onSelect }: ScenarioSelectorProps) => {
       <h3 className="text-lg font-medium text-secondary-800 mb-3">选择场景</h3>
       <RadioGroup value={selectedScenario} onChange={handleSelect}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {scenarios.map((scenario) => (
+          {Array.isArray(scenarios) && scenarios.map((scenario) => (
             <RadioGroup.Option
               key={scenario.id}
               value={scenario}

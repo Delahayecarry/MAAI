@@ -1,24 +1,24 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import path from 'path'
+import { resolve } from 'node:path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, './src'),
+      '@': resolve(process.cwd(), './src'),
     },
   },
   esbuild: {
     logOverride: { 'this-is-undefined-in-esm': 'silent' },
     // 忽略类型错误
-    tsconfigRaw: {
+    tsconfigRaw: JSON.stringify({
       compilerOptions: {
         skipLibCheck: true,
         noImplicitAny: false,
       }
-    }
+    })
   },
   server: {
     proxy: {
@@ -26,16 +26,20 @@ export default defineConfig({
         target: 'http://localhost:8000',
         changeOrigin: true,
         secure: false,
-        rewrite: (path) => path.replace(/^\/api/, '/api'),
       },
       '/api/events': {
         target: 'http://localhost:8000',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ''),
-        // 对SSE连接的特殊处理
+        secure: false,
         configure: (proxy, _options) => {
           proxy.on('error', (err, _req, _res) => {
-            console.log('代理错误', err);
+            console.log('SSE代理错误 (/api/events):', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            console.log('SSE代理请求 (/api/events):', req.url);
+          });
+          proxy.on('proxyRes', (_proxyRes, req, _res) => {
+            console.log('SSE代理响应 (/api/events):', req.url);
           });
         }
       },
@@ -43,7 +47,18 @@ export default defineConfig({
         target: 'http://localhost:8000',
         changeOrigin: true,
         secure: false,
-        ws: true,
+        rewrite: (path) => path.replace(/^\/events/, '/api/events'),
+        configure: (proxy, _options) => {
+          proxy.on('error', (err, _req, _res) => {
+            console.log('SSE代理错误 (/events):', err);
+          });
+          proxy.on('proxyReq', (proxyReq, req, _res) => {
+            console.log('SSE代理请求 (/events):', req.url);
+          });
+          proxy.on('proxyRes', (_proxyRes, req, _res) => {
+            console.log('SSE代理响应 (/events):', req.url);
+          });
+        }
       }
     }
   }
