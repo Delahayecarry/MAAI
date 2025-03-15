@@ -27,7 +27,7 @@ const HistoryPage = () => {
       
       try {
         const data = await apiService.getHistoryList()
-        setHistoryList(data)
+        setHistoryList(Array.isArray(data) ? data : [])
       } catch (err) {
         setError('获取历史记录列表失败')
         console.error(err)
@@ -90,13 +90,13 @@ const HistoryPage = () => {
         >
           <h2 className="text-lg font-medium text-secondary-800 mb-4">对话记录列表</h2>
           
-          {isLoading && historyList.length === 0 ? (
+          {isLoading && (!historyList || historyList.length === 0) ? (
             <p className="text-secondary-500">加载中...</p>
-          ) : historyList.length === 0 ? (
+          ) : !historyList || historyList.length === 0 ? (
             <p className="text-secondary-500">暂无历史对话记录</p>
           ) : (
             <ul className="space-y-2">
-              {historyList.map((item) => (
+              {Array.isArray(historyList) && historyList.map((item) => (
                 <li key={item.id}>
                   <button
                     onClick={() => handleHistorySelect(item.id)}
